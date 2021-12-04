@@ -52,6 +52,8 @@ ggseg = function(.data = NULL,
                  view = NULL,
                  hemisphere = NULL,
                  adapt_scales = TRUE,
+                 interactive=FALSE,
+                 guide=TRUE,
                  ...){
 
   # Grab the atlas, even if it has been provided as character string
@@ -97,6 +99,7 @@ ggseg = function(.data = NULL,
     atlas <- filter(atlas, !is.na(.long))
   }
 
+  #browser()
   # Create the plot
   gg <- ggplot(data = atlas,
                aes(x = .long,
@@ -104,7 +107,7 @@ ggseg = function(.data = NULL,
                    group = .id,
                    subgroup = .subid
                    )) +
-    geom_polygon(...) +
+    geom_polygon_interactive(...) +
     coord_fixed()
 
 
@@ -116,7 +119,20 @@ ggseg = function(.data = NULL,
       scale_labs_brain(atlas, stack)
   }
 
-  gg + theme_brain()
+  gg <- if (!guide) {
+    gg + theme_brain() + guides(fill="none")
+  } else {
+    gg + theme_brain()
+  }
+
+  if (interactive) {
+    x=girafe(code=print(gg))
+    x=girafe_options(x = x,opts_tooltip(opacity = .7,
+                                        css="font-family: Arial, Helvetica, sans-serif;"))
+    x
+  } else {
+    gg
+  }
 
 }
 
